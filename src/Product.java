@@ -4,12 +4,12 @@ public class Product {
     public int quantity = 0;
     public void addStock(int amount) {
         if (amount > 0) {
-            ++quantity;
+            quantity += amount;
         }
     }
     public void sell(int amount) {
         if (amount <= quantity) {
-            quantity = quantity - amount;
+            quantity -= amount;
             System.out.println("Sold " + amount + " items");
         } else {
             System.out.println("Not enough items in stock...");
@@ -17,7 +17,7 @@ public class Product {
     }
     public void changePrice(double newPrice) {
         if(newPrice > 0) {
-
+            price = newPrice;
         }
     }
     public double stockValue() {
@@ -28,6 +28,5 @@ public class Product {
         System.out.println("Price           : " + price + " Baht/Item");
         System.out.println("Stock           : " + quantity + " Items");
         System.out.println("Stock value     : " + stockValue() + " Baht");
-        System.out.println("------------------------------------------------");
     }
 }

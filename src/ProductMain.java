@@ -10,14 +10,20 @@ public class ProductMain {
         product.price = Double.parseDouble(JOptionPane.showInputDialog("Enter product price per item: "));
         product.quantity = Integer.parseInt(JOptionPane.showInputDialog("Enter product product stock: "));
         int confirm = JOptionPane.showConfirmDialog(null,"Do you want to add more item?");
+        product.showInfo();
         if (confirm == 0) {
             int amount = Integer.parseInt(JOptionPane.showInputDialog("How many item to add in stock?"));
+            product.addStock(amount);
         }
         int change = JOptionPane.showConfirmDialog(null,"Do you want to change price?");
         if (change == 0) {
             double newPrice = Double.parseDouble(JOptionPane.showInputDialog("How much is the new price per item?"));
             product.changePrice(newPrice);
         }
+        System.out.println();
+        System.out.println("Added " + (product.quantity - 50) + " items to stock");
+        System.out.println("Change price to " + product.price + " baht");
+        System.out.println();
         product.showInfo();
     }
 }
