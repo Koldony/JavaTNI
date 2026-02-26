@@ -1,0 +1,129 @@
+package Books;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+
+public class BookStoreGUI extends JFrame {
+
+    private BookStore store;
+    private Cart cart;
+    private JTable table;
+    private DefaultTableModel tableModel;
+
+    public BookStoreGUI() {
+
+        ArrayList<Book> books = FileManager.loadBooks("books.txt");
+        ArrayList<Employee> employees = FileManager.loadEmployees("employees.txt");
+
+        if (!LoginSystem.login(employees)) {
+            JOptionPane.showMessageDialog(this, "Login Failed!");
+            System.exit(0);
+        }
+
+        JOptionPane.showMessageDialog(this, "Login Success!");
+
+        store = new BookStore(books);
+        cart = new Cart();
+
+        setTitle("Book Store System");
+        setSize(700, 400);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        initUI();
+        loadTableData();
+    }
+
+    private void initUI() {
+
+        tableModel = new DefaultTableModel(
+                new String[]{"Title", "Author", "Price", "Stock"}, 0);
+        table = new JTable(tableModel);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+
+        JButton btnAddStock = new JButton("Add Stock");
+        JButton btnAddToCart = new JButton("Add To Cart");
+        JButton btnViewCart = new JButton("View Cart");
+        JButton btnRefresh = new JButton("Refresh");
+
+        JPanel panel = new JPanel();
+        panel.add(btnAddStock);
+        panel.add(btnAddToCart);
+        panel.add(btnViewCart);
+        panel.add(btnRefresh);
+
+        add(scrollPane, BorderLayout.CENTER);
+        add(panel, BorderLayout.SOUTH);
+
+        btnAddStock.addActionListener(this::addStock);
+        btnAddToCart.addActionListener(this::addToCart);
+        btnViewCart.addActionListener(e ->
+                JOptionPane.showMessageDialog(this, cart.showCart()));
+        btnRefresh.addActionListener(e -> loadTableData());
+    }
+
+    private void loadTableData() {
+
+        tableModel.setRowCount(0);
+
+        for (Book b : store.getBooks()) {
+            tableModel.addRow(new Object[]{
+                    b.getTitle(),
+                    b.getAuthor(),
+                    b.getPrice(),
+                    b.getStock()
+            });
+        }
+    }
+
+    private void addStock(ActionEvent e) {
+
+        int row = table.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Select a book first");
+            return;
+        }
+
+        String amountStr = JOptionPane.showInputDialog("Enter amount:");
+        if (amountStr == null) return;
+
+        int amount = Integer.parseInt(amountStr);
+
+        Book book = store.getBooks().get(row);
+        book.addStock(amount);
+
+        FileManager.saveBooks("books.txt", store.getBooks());
+        loadTableData();
+        JOptionPane.showMessageDialog(this, "Stock Updated");
+    }
+
+    private void addToCart(ActionEvent e) {
+
+        int row = table.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Select a book first");
+            return;
+        }
+
+        Book book = store.getBooks().get(row);
+
+        if (book.reduceStock(1)) {
+            cart.addToCart(book);
+            FileManager.saveBooks("books.txt", store.getBooks());
+            loadTableData();
+            JOptionPane.showMessageDialog(this, "Added to cart");
+        } else {
+            JOptionPane.showMessageDialog(this, "Out of stock");
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new BookStoreGUI().setVisible(true);
+        });
+    }
+}
